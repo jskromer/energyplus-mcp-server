@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(energyplus --version:*)",
+      "Bash(git -C /Users/johnstephenkromer/EnergyPlus-MCP/energyplus-mcp-server log --oneline --since=\"24 hours ago\")",
+      "Bash(find:*)",
+      "Bash(echo:*)",
+      "Bash(ls:*)",
+      "Bash(source .venv/bin/activate)",
+      "Bash(python3:*)",
+      "Bash(cat:*)",
+      "Bash(pip install:*)",
+      "Bash(python -c:*)",
+      "Bash(EPLUS_IDD_PATH=\"/Applications/EnergyPlus-25-2-0/Energy+.idd\" python:*)"
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.env
+
+# EnergyPlus output files (temporary)
+*.audit
+*.bnd
+*.dxf
+*.eio
+*.end
+*.err
+*.eso
+*.mdd
+*.mtd
+*.mtr
+*.rdd
+*.shd
+*.svg
+Energy+.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Keep only specific results
+ny_house_results/
+calibration_workflow/
+digital_twin/
+dual_digital_twin/
+
+# Large files we don't need in git
+*.epw
+*.idf
+*.zip
+!bayesian_calibration_results/**

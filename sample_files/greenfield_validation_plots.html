@@ -1,0 +1,54 @@
+<!DOCTYPE html><html><head><title>Greenfield Validation Plots</title>
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+<style>body{font-family:Arial;margin:20px} .plot{margin-bottom:30px}</style></head><body>
+<h1>Greenfield Municipal Center — Validation Plots</h1>
+
+<div id="p1" class="plot" style="width:1000px;height:550px;"></div>
+<div id="p2" class="plot" style="width:1000px;height:550px;"></div>
+<div id="p3" class="plot" style="width:1000px;height:550px;"></div>
+
+<h2>Summary Statistics</h2>
+<table border="1" cellpadding="5" style="border-collapse:collapse">
+<tr><th>Metric</th><th>Baseline</th><th>Reporting (w/NRA)</th><th>Reporting (no NRA)</th></tr>
+<tr><td>Annual Electric (kWh)</td><td>1,162,628</td><td>1,134,222</td><td>1,040,238</td></tr>
+<tr><td>Annual Gas (therms)</td><td>5,801</td><td>6,157</td><td>6,157</td></tr>
+<tr><td>Electric Savings (no NRA)</td><td colspan="3">122,390 kWh (10.5%)</td></tr>
+<tr><td>NRA Impact</td><td colspan="3">+93,984 kWh (Aug-Dec step change)</td></tr>
+<tr><td>Electric EUI (kBtu/ft²)</td><td>64.0</td><td>62.4</td><td>57.2</td></tr>
+</table>
+
+<script>
+var mo=["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+var b_oat=[33.0, 34.9, 45.9, 54.4, 64.7, 72.5, 76.1, 73.4, 68.2, 53.5, 46.1, 33.8];var b_kwh=[108662.0, 93429.0, 93584.0, 89039.0, 95784.0, 95115.0, 104702.0, 100216.0, 92868.0, 92756.0, 90863.0, 105610.0];var b_thm=[1139.0, 779.0, 482.0, 343.0, 270.0, 223.0, 237.0, 237.0, 236.0, 366.0, 488.0, 1001.0];
+var r_oat=[33.0, 34.9, 45.9, 54.4, 64.7, 72.5, 76.1, 73.4, 68.2, 53.5, 46.1, 33.8];var r_kwh=[100821.0, 86657.0, 85854.0, 80327.0, 83786.0, 82013.0, 88744.0, 105103.0, 99247.0, 102576.0, 101922.0, 117172.0];var n_kwh=[100821.0, 86657.0, 85854.0, 80327.0, 83786.0, 82013.0, 88744.0, 85883.0, 80749.0, 83597.0, 83585.0, 98222.0];
+
+// Plot 1: Baseline Electric vs OAT (5P check)
+Plotly.newPlot('p1',[
+{x:b_oat,y:b_kwh,mode:'markers+text',text:mo,textposition:'top center',
+marker:{size:14,color:'blue'},name:'Baseline Electric'}
+],{title:'Baseline: Monthly Electricity vs Avg OAT (5P Change-Point)',
+xaxis:{title:'Average OAT (°F)'},yaxis:{title:'Monthly Electricity (kWh)'},
+shapes:[{type:'line',x0:48,y0:Math.min(...b_kwh)*0.95,x1:48,y1:Math.max(...b_kwh)*1.05,line:{color:'green',dash:'dash'}},
+{type:'line',x0:63,y0:Math.min(...b_kwh)*0.95,x1:63,y1:Math.max(...b_kwh)*1.05,line:{color:'orange',dash:'dash'}}],
+annotations:[{x:45,y:Math.max(...b_kwh)*1.03,text:'Htg Change Pt',showarrow:false,font:{color:'green',size:11}},
+{x:66,y:Math.max(...b_kwh)*1.03,text:'Clg Change Pt',showarrow:false,font:{color:'orange',size:11}}]});
+
+// Plot 2: Baseline Gas vs OAT (3P heating)
+Plotly.newPlot('p2',[
+{x:b_oat,y:b_thm,mode:'markers+text',text:mo,textposition:'top center',
+marker:{size:14,color:'red'},name:'Baseline Gas'}
+],{title:'Baseline: Monthly Gas vs Avg OAT (3P Heating Change-Point)',
+xaxis:{title:'Average OAT (°F)'},yaxis:{title:'Monthly Gas (therms)'}});
+
+// Plot 3: Reporting Period time series (NRA visible)
+Plotly.newPlot('p3',[
+{x:mo,y:b_kwh,mode:'lines+markers',marker:{size:10},name:'Baseline',line:{color:'blue',dash:'dash'}},
+{x:mo,y:r_kwh,mode:'lines+markers',marker:{size:10},name:'Reporting (w/ NRA)',line:{color:'red'}},
+{x:mo,y:n_kwh,mode:'lines+markers',marker:{size:10},name:'Reporting (no NRA)',line:{color:'green'}}
+],{title:'Monthly Electric: Baseline vs Reporting Period (NRA step visible Aug-Dec)',
+xaxis:{title:'Month'},yaxis:{title:'Monthly Electricity (kWh)'},
+shapes:[{type:'rect',x0:7.5,y0:0,x1:11.5,y1:Math.max(...r_kwh)*1.05,
+fillcolor:'rgba(255,0,0,0.1)',line:{width:0}},
+{type:'line',x0:7.5,y0:0,x1:7.5,y1:Math.max(...r_kwh)*1.05,line:{color:'red',dash:'dot'}}],
+annotations:[{x:9.5,y:Math.max(...r_kwh)*1.02,text:'NRA: DC Expansion',showarrow:false,font:{color:'red',size:12}}]});
+</script></body></html>
