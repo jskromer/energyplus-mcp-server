@@ -65,7 +65,7 @@ class EnergyPlusManager:
         self.lights_manager = LightsManager()
         self.electric_equipment_manager = ElectricEquipmentManager()
         
-        logger.info(f"EnergyPlus Manager initialized with IDD: {self.config.energyplus.idd_path}")
+        logger.info("EnergyPlus Manager initialized with IDD: %s", self.config.energyplus.idd_path)
     
 
     def _initialize_eppy(self):
@@ -80,7 +80,7 @@ class EnergyPlusManager:
         
         try:
             eppy.modeleditor.IDF.setiddname(idd_path)
-            logger.debug(f"Eppy initialized with IDD: {idd_path}")
+            logger.debug("Eppy initialized with IDD: %s", idd_path)
         except Exception as e:
             raise RuntimeError(f"Failed to initialize eppy with IDD {idd_path}: {e}")
     
@@ -95,7 +95,7 @@ class EnergyPlusManager:
         resolved_path = self._resolve_idf_path(idf_path)
         
         try:
-            logger.info(f"Loading IDF file: {resolved_path}")
+            logger.info("Loading IDF file: %s", resolved_path)
             idf = IDF(resolved_path)
             
             # Get basic counts
@@ -117,11 +117,11 @@ class EnergyPlusManager:
                 "file_size_bytes": os.path.getsize(resolved_path)
             }
             
-            logger.info(f"IDF loaded successfully: {zone_count} zones, {surface_count} surfaces")
+            logger.info("IDF loaded successfully: %s zones, %s surfaces", zone_count, surface_count)
             return result
             
         except Exception as e:
-            logger.error(f"Error loading IDF file {resolved_path}: {e}")
+            logger.error("Error loading IDF file %s: %s", resolved_path, e)
             raise RuntimeError(f"Error loading IDF file: {str(e)}")
     
 
@@ -137,7 +137,7 @@ class EnergyPlusManager:
         """
         try:
             sample_path = Path(self.config.paths.sample_files_path)
-            logger.debug(f"Listing files in sample_files: {sample_path}")
+            logger.debug("Listing files in sample_files: %s", sample_path)
             
             files = {
                 "sample_files": {
@@ -170,7 +170,7 @@ class EnergyPlusManager:
             # Conditionally process example files directory
             if include_example_files:
                 example_path = Path(self.config.energyplus.example_files_path)
-                logger.debug(f"Listing files in example_files: {example_path}")
+                logger.debug("Listing files in example_files: %s", example_path)
                 
                 files["example_files"] = {
                     "path": str(example_path),
@@ -200,7 +200,7 @@ class EnergyPlusManager:
             # Conditionally process weather data directory
             if include_weather_data:
                 weather_path = Path(self.config.energyplus.weather_data_path)
-                logger.debug(f"Listing files in weather_data: {weather_path}")
+                logger.debug("Listing files in weather_data: %s", weather_path)
                 
                 files["weather_data"] = {
                     "path": str(weather_path),
@@ -238,12 +238,12 @@ class EnergyPlusManager:
                 total_idf = len(files[source_key]["IDF files"])
                 total_weather = len(files[source_key]["Weather files"])
                 total_counts[source_key] = {"IDF": total_idf, "Weather": total_weather}
-                logger.debug(f"Found {total_idf} IDF files, {total_weather} weather files in {source_key}")
+                logger.debug("Found %s IDF files, %s weather files in %s", total_idf, total_weather, source_key)
             
             return json.dumps(files, indent=2)
             
         except Exception as e:
-            logger.error(f"Error listing available files: {e}")
+            logger.error("Error listing available files: %s", e)
             raise RuntimeError(f"Error listing available files: {str(e)}")
     
 
@@ -261,7 +261,7 @@ class EnergyPlusManager:
             JSON string with copy operation results
         """
         try:
-            logger.info(f"Copying file from '{source_path}' to '{target_path}'")
+            logger.info("Copying file from '%s' to '%s'", source_path, target_path)
             
             # Determine file description for error messages
             file_description = "file"
@@ -277,11 +277,11 @@ class EnergyPlusManager:
             enable_fuzzy = file_types and '.epw' in file_types  # Enable fuzzy matching for weather files
             resolved_source_path = resolve_path(self.config, source_path, file_types, file_description, 
                                                must_exist=True, enable_fuzzy_weather_matching=enable_fuzzy)
-            logger.debug(f"Resolved source path: {resolved_source_path}")
+            logger.debug("Resolved source path: %s", resolved_source_path)
             
             # Resolve target path (for creation)
             resolved_target_path = resolve_path(self.config, target_path, must_exist=False, description="target file")
-            logger.debug(f"Resolved target path: {resolved_target_path}")
+            logger.debug("Resolved target path: %s", resolved_target_path)
             
             # Check if source file is readable
             if not os.access(resolved_source_path, os.R_OK):
@@ -295,7 +295,7 @@ class EnergyPlusManager:
             target_dir = os.path.dirname(resolved_target_path)
             if target_dir:
                 os.makedirs(target_dir, exist_ok=True)
-                logger.debug(f"Created target directory: {target_dir}")
+                logger.debug("Created target directory: %s", target_dir)
             
             # Get source file info before copying
             source_stat = os.stat(resolved_source_path)
@@ -329,7 +329,7 @@ class EnergyPlusManager:
                 except Exception as e:
                     validation_passed = False
                     validation_message = f"Warning: Copied IDF file may be invalid: {str(e)}"
-                    logger.warning(f"IDF validation failed for copied file: {e}")
+                    logger.warning("IDF validation failed for copied file: %s", e)
             
             result = {
                 "success": True,
@@ -354,11 +354,11 @@ class EnergyPlusManager:
                 "timestamp": end_time.isoformat()
             }
             
-            logger.info(f"Successfully copied file: {resolved_source_path} -> {resolved_target_path}")
+            logger.info("Successfully copied file: %s -> %s", resolved_source_path, resolved_target_path)
             return json.dumps(result, indent=2)
             
         except FileNotFoundError as e:
-            logger.warning(f"Source file not found: {source_path}")
+            logger.warning("Source file not found: %s", source_path)
             
             # Try to provide helpful suggestions
             try:
@@ -383,7 +383,7 @@ class EnergyPlusManager:
                 }, indent=2)
         
         except FileExistsError as e:
-            logger.warning(f"Target file already exists: {target_path}")
+            logger.warning("Target file already exists: %s", target_path)
             return json.dumps({
                 "success": False,
                 "error": "File already exists",
@@ -394,7 +394,7 @@ class EnergyPlusManager:
             }, indent=2)
         
         except PermissionError as e:
-            logger.error(f"Permission error during copy: {e}")
+            logger.error("Permission error during copy: %s", e)
             return json.dumps({
                 "success": False,
                 "error": "Permission denied",
@@ -403,7 +403,7 @@ class EnergyPlusManager:
             }, indent=2)
         
         except Exception as e:
-            logger.error(f"Error copying file from {source_path} to {target_path}: {e}")
+            logger.error("Error copying file from %s to %s: %s", source_path, target_path, e)
             return json.dumps({
                 "success": False,
                 "error": "Copy operation failed",
@@ -451,7 +451,7 @@ class EnergyPlusManager:
             return json.dumps(config_info, indent=2)
             
         except Exception as e:
-            logger.error(f"Error getting configuration info: {e}")
+            logger.error("Error getting configuration info: %s", e)
             raise RuntimeError(f"Error getting configuration info: {str(e)}")
     
  
@@ -460,7 +460,7 @@ class EnergyPlusManager:
         resolved_path = self._resolve_idf_path(idf_path)
         
         try:
-            logger.debug(f"Validating IDF file: {resolved_path}")
+            logger.debug("Validating IDF file: %s", resolved_path)
             idf = IDF(resolved_path)
             
             validation_results = {
@@ -524,11 +524,11 @@ class EnergyPlusManager:
                 "construction_count": len(constructions)
             }
             
-            logger.debug(f"Validation completed: {len(errors)} errors, {len(warnings)} warnings")
+            logger.debug("Validation completed: %s errors, %s warnings", len(errors), len(warnings))
             return json.dumps(validation_results, indent=2)
             
         except Exception as e:
-            logger.error(f"Error validating IDF file {resolved_path}: {e}")
+            logger.error("Error validating IDF file %s: %s", resolved_path, e)
             raise RuntimeError(f"Error validating IDF file: {str(e)}")
     
     # ----------------------------- Model Inspection Methods ------------------------
@@ -537,7 +537,7 @@ class EnergyPlusManager:
         resolved_path = self._resolve_idf_path(idf_path)
         
         try:
-            logger.debug(f"Getting model basics for: {resolved_path}")
+            logger.debug("Getting model basics for: %s", resolved_path)
             idf = IDF(resolved_path)
             basics = {}
             
@@ -590,11 +590,11 @@ class EnergyPlusManager:
                     "Version Identifier": getattr(version, 'Version_Identifier', 'Unknown')
                 }
             
-            logger.debug(f"Model basics extracted for {len(basics)} sections")
+            logger.debug("Model basics extracted for %s sections", len(basics))
             return json.dumps(basics, indent=2)
             
         except Exception as e:
-            logger.error(f"Error getting model basics for {resolved_path}: {e}")
+            logger.error("Error getting model basics for %s: %s", resolved_path, e)
             raise RuntimeError(f"Error getting model basics: {str(e)}")
     
 
@@ -603,7 +603,7 @@ class EnergyPlusManager:
         resolved_path = self._resolve_idf_path(idf_path)
         
         try:
-            logger.debug(f"Checking simulation settings for: {resolved_path}")
+            logger.debug("Checking simulation settings for: %s", resolved_path)
             idf = IDF(resolved_path)
             
             settings_info = {
@@ -680,11 +680,11 @@ class EnergyPlusManager:
             if not run_objs:
                 settings_info["RunPeriod"]["error"] = "No RunPeriod objects found"
             
-            logger.debug(f"Found {len(sim_objs)} SimulationControl and {len(run_objs)} RunPeriod objects")
+            logger.debug("Found %s SimulationControl and %s RunPeriod objects", len(sim_objs), len(run_objs))
             return json.dumps(settings_info, indent=2)
             
         except Exception as e:
-            logger.error(f"Error checking simulation settings for {resolved_path}: {e}")
+            logger.error("Error checking simulation settings for %s: %s", resolved_path, e)
             raise RuntimeError(f"Error checking simulation settings: {str(e)}")
     
     
@@ -693,7 +693,7 @@ class EnergyPlusManager:
         resolved_path = self._resolve_idf_path(idf_path)
         
         try:
-            logger.debug(f"Listing zones for: {resolved_path}")
+            logger.debug("Listing zones for: %s", resolved_path)
             idf = IDF(resolved_path)
             zones = idf.idfobjects.get("Zone", [])
             
@@ -713,11 +713,11 @@ class EnergyPlusManager:
                 }
                 zone_info.append(zone_data)
             
-            logger.debug(f"Found {len(zone_info)} zones")
+            logger.debug("Found %s zones", len(zone_info))
             return json.dumps(zone_info, indent=2)
             
         except Exception as e:
-            logger.error(f"Error listing zones for {resolved_path}: {e}")
+            logger.error("Error listing zones for %s: %s", resolved_path, e)
             raise RuntimeError(f"Error listing zones: {str(e)}")
     
 
@@ -726,7 +726,7 @@ class EnergyPlusManager:
         resolved_path = self._resolve_idf_path(idf_path)
         
         try:
-            logger.debug(f"Getting surfaces for: {resolved_path}")
+            logger.debug("Getting surfaces for: %s", resolved_path)
             idf = IDF(resolved_path)
             surfaces = idf.idfobjects.get("BuildingSurface:Detailed", [])
             
@@ -745,11 +745,11 @@ class EnergyPlusManager:
                 }
                 surface_info.append(surface_data)
             
-            logger.debug(f"Found {len(surface_info)} surfaces")
+            logger.debug("Found %s surfaces", len(surface_info))
             return json.dumps(surface_info, indent=2)
             
         except Exception as e:
-            logger.error(f"Error getting surfaces for {resolved_path}: {e}")
+            logger.error("Error getting surfaces for %s: %s", resolved_path, e)
             raise RuntimeError(f"Error getting surfaces: {str(e)}")
     
 
@@ -758,7 +758,7 @@ class EnergyPlusManager:
         resolved_path = self._resolve_idf_path(idf_path)
         
         try:
-            logger.debug(f"Getting materials for: {resolved_path}")
+            logger.debug("Getting materials for: %s", resolved_path)
             idf = IDF(resolved_path)
             
             materials = []
@@ -791,11 +791,11 @@ class EnergyPlusManager:
                 }
                 materials.append(material_data)
             
-            logger.debug(f"Found {len(materials)} materials")
+            logger.debug("Found %s materials", len(materials))
             return json.dumps(materials, indent=2)
             
         except Exception as e:
-            logger.error(f"Error getting materials for {resolved_path}: {e}")
+            logger.error("Error getting materials for %s: %s", resolved_path, e)
             raise RuntimeError(f"Error getting materials: {str(e)}")
     
 
@@ -812,17 +812,17 @@ class EnergyPlusManager:
         resolved_path = self._resolve_idf_path(idf_path)
         
         try:
-            logger.info(f"Inspecting People objects for: {resolved_path}")
+            logger.info("Inspecting People objects for: %s", resolved_path)
             result = self.people_manager.get_people_objects(resolved_path)
             
             if result["success"]:
-                logger.info(f"Found {result['total_people_objects']} People objects")
+                logger.info("Found %s People objects", result['total_people_objects'])
                 return json.dumps(result, indent=2)
             else:
                 raise RuntimeError(result.get("error", "Unknown error"))
                 
         except Exception as e:
-            logger.error(f"Error inspecting People objects for {resolved_path}: {e}")
+            logger.error("Error inspecting People objects for %s: %s", resolved_path, e)
             raise RuntimeError(f"Error inspecting People objects: {str(e)}")
     
     
@@ -844,7 +844,7 @@ class EnergyPlusManager:
         resolved_path = self._resolve_idf_path(idf_path)
         
         try:
-            logger.info(f"Modifying People objects for: {resolved_path}")
+            logger.info("Modifying People objects for: %s", resolved_path)
             
             # Validate modifications first
             validation = self.people_manager.validate_people_modifications(modifications)
@@ -866,13 +866,13 @@ class EnergyPlusManager:
             )
             
             if result["success"]:
-                logger.info(f"Successfully modified People objects and saved to: {output_path}")
+                logger.info("Successfully modified People objects and saved to: %s", output_path)
                 return json.dumps(result, indent=2)
             else:
                 raise RuntimeError(result.get("error", "Unknown error"))
                 
         except Exception as e:
-            logger.error(f"Error modifying People objects for {resolved_path}: {e}")
+            logger.error("Error modifying People objects for %s: %s", resolved_path, e)
             raise RuntimeError(f"Error modifying People objects: {str(e)}")
 
     
@@ -889,17 +889,17 @@ class EnergyPlusManager:
         resolved_path = self._resolve_idf_path(idf_path)
         
         try:
-            logger.info(f"Inspecting Lights objects for: {resolved_path}")
+            logger.info("Inspecting Lights objects for: %s", resolved_path)
             result = self.lights_manager.get_lights_objects(resolved_path)
             
             if result["success"]:
-                logger.info(f"Found {result['total_lights_objects']} Lights objects")
+                logger.info("Found %s Lights objects", result['total_lights_objects'])
                 return json.dumps(result, indent=2)
             else:
                 raise RuntimeError(result.get("error", "Unknown error"))
                 
         except Exception as e:
-            logger.error(f"Error inspecting Lights objects for {resolved_path}: {e}")
+            logger.error("Error inspecting Lights objects for %s: %s", resolved_path, e)
             raise RuntimeError(f"Error inspecting Lights objects: {str(e)}")
     
     
@@ -921,7 +921,7 @@ class EnergyPlusManager:
         resolved_path = self._resolve_idf_path(idf_path)
         
         try:
-            logger.info(f"Modifying Lights objects for: {resolved_path}")
+            logger.info("Modifying Lights objects for: %s", resolved_path)
             
             # Validate modifications first
             validation = self.lights_manager.validate_lights_modifications(modifications)
@@ -943,13 +943,13 @@ class EnergyPlusManager:
             )
             
             if result["success"]:
-                logger.info(f"Successfully modified Lights objects and saved to: {output_path}")
+                logger.info("Successfully modified Lights objects and saved to: %s", output_path)
                 return json.dumps(result, indent=2)
             else:
                 raise RuntimeError(result.get("error", "Unknown error"))
                 
         except Exception as e:
-            logger.error(f"Error modifying Lights objects for {resolved_path}: {e}")
+            logger.error("Error modifying Lights objects for %s: %s", resolved_path, e)
             raise RuntimeError(f"Error modifying Lights objects: {str(e)}")
 
     
@@ -966,17 +966,17 @@ class EnergyPlusManager:
         resolved_path = self._resolve_idf_path(idf_path)
         
         try:
-            logger.info(f"Inspecting ElectricEquipment objects for: {resolved_path}")
+            logger.info("Inspecting ElectricEquipment objects for: %s", resolved_path)
             result = self.electric_equipment_manager.get_electric_equipment_objects(resolved_path)
             
             if result["success"]:
-                logger.info(f"Found {result['total_electric_equipment_objects']} ElectricEquipment objects")
+                logger.info("Found %s ElectricEquipment objects", result['total_electric_equipment_objects'])
                 return json.dumps(result, indent=2)
             else:
                 raise RuntimeError(result.get("error", "Unknown error"))
                 
         except Exception as e:
-            logger.error(f"Error inspecting ElectricEquipment objects for {resolved_path}: {e}")
+            logger.error("Error inspecting ElectricEquipment objects for %s: %s", resolved_path, e)
             raise RuntimeError(f"Error inspecting ElectricEquipment objects: {str(e)}")
     
     
@@ -998,7 +998,7 @@ class EnergyPlusManager:
         resolved_path = self._resolve_idf_path(idf_path)
         
         try:
-            logger.info(f"Modifying ElectricEquipment objects for: {resolved_path}")
+            logger.info("Modifying ElectricEquipment objects for: %s", resolved_path)
             
             # Validate modifications first
             validation = self.electric_equipment_manager.validate_electric_equipment_modifications(modifications)
@@ -1020,13 +1020,13 @@ class EnergyPlusManager:
             )
             
             if result["success"]:
-                logger.info(f"Successfully modified ElectricEquipment objects and saved to: {output_path}")
+                logger.info("Successfully modified ElectricEquipment objects and saved to: %s", output_path)
                 return json.dumps(result, indent=2)
             else:
                 raise RuntimeError(result.get("error", "Unknown error"))
                 
         except Exception as e:
-            logger.error(f"Error modifying ElectricEquipment objects for {resolved_path}: {e}")
+            logger.error("Error modifying ElectricEquipment objects for %s: %s", resolved_path, e)
             raise RuntimeError(f"Error modifying ElectricEquipment objects: {str(e)}")
 
     
@@ -1047,16 +1047,16 @@ class EnergyPlusManager:
         
         try:
             if discover_available:
-                logger.info(f"Discovering available output variables for: {resolved_path}")
+                logger.info("Discovering available output variables for: %s", resolved_path)
                 result = self.output_var_manager.discover_available_variables(resolved_path, run_days)
             else:
-                logger.debug(f"Getting configured output variables for: {resolved_path}")
+                logger.debug("Getting configured output variables for: %s", resolved_path)
                 result = self.output_var_manager.get_configured_variables(resolved_path)
             
             return json.dumps(result, indent=2)
             
         except Exception as e:
-            logger.error(f"Error getting output variables for {resolved_path}: {e}")
+            logger.error("Error getting output variables for %s: %s", resolved_path, e)
             raise RuntimeError(f"Error getting output variables: {str(e)}")
 
 
@@ -1078,7 +1078,7 @@ class EnergyPlusManager:
             JSON string with operation results
         """
         try:
-            logger.info(f"Adding output variables to {idf_path} (validation: {validation_level})")
+            logger.info("Adding output variables to %s (validation: %s)", idf_path, validation_level)
             
             # Resolve IDF path
             resolved_path = self._resolve_idf_path(idf_path)
@@ -1141,11 +1141,11 @@ class EnergyPlusManager:
             if not addition_result["success"]:
                 result["addition_error"] = addition_result.get("error", "Unknown error")
             
-            logger.info(f"Successfully processed output variables: {addition_result['added_count']} added")
+            logger.info("Successfully processed output variables: %s added", addition_result['added_count'])
             return json.dumps(result, indent=2)
             
         except Exception as e:
-            logger.error(f"Error in add_output_variables: {e}")
+            logger.error("Error in add_output_variables: %s", e)
             return json.dumps({
                 "success": False,
                 "error": str(e),
@@ -1193,7 +1193,7 @@ class EnergyPlusManager:
             ], validation_level="strict")
         """
         try:
-            logger.info(f"Adding output meters to {idf_path} (validation: {validation_level})")
+            logger.info("Adding output meters to %s (validation: %s)", idf_path, validation_level)
             
             # Resolve IDF path
             resolved_path = self._resolve_idf_path(idf_path)
@@ -1256,11 +1256,11 @@ class EnergyPlusManager:
             if not addition_result["success"]:
                 result["addition_error"] = addition_result.get("error", "Unknown error")
             
-            logger.info(f"Successfully processed output meters: {addition_result['added_count']} added")
+            logger.info("Successfully processed output meters: %s added", addition_result['added_count'])
             return json.dumps(result, indent=2)
             
         except Exception as e:
-            logger.error(f"Error in add_output_meters: {e}")
+            logger.error("Error in add_output_meters: %s", e)
             return json.dumps({
                 "success": False,
                 "error": str(e),
@@ -1287,16 +1287,16 @@ class EnergyPlusManager:
         
         try:
             if discover_available:
-                logger.info(f"Discovering available output meters for: {resolved_path}")
+                logger.info("Discovering available output meters for: %s", resolved_path)
                 result = self.output_meter_manager.discover_available_meters(resolved_path, run_days)
             else:
-                logger.debug(f"Getting configured output meters for: {resolved_path}")
+                logger.debug("Getting configured output meters for: %s", resolved_path)
                 result = self.output_meter_manager.get_configured_meters(resolved_path)
             
             return json.dumps(result, indent=2)
             
         except Exception as e:
-            logger.error(f"Error getting output meters for {resolved_path}: {e}")
+            logger.error("Error getting output meters for %s: %s", resolved_path, e)
             raise RuntimeError(f"Error getting output meters: {str(e)}")
 
 
@@ -1315,7 +1315,7 @@ class EnergyPlusManager:
         resolved_path = self._resolve_idf_path(idf_path)
         
         try:
-            logger.debug(f"Inspecting schedules for: {resolved_path} (include_values={include_values})")
+            logger.debug("Inspecting schedules for: %s (include_values=%s)", resolved_path, include_values)
             idf = IDF(resolved_path)
             
             # Define all schedule object types to inspect
@@ -1391,7 +1391,7 @@ class EnergyPlusManager:
                             if values:
                                 day_info["values"] = values
                         except Exception as e:
-                            logger.warning(f"Failed to extract values for {day_info['name']}: {e}")
+                            logger.warning("Failed to extract values for %s: %s", day_info['name'], e)
                             day_info["values"] = {"error": f"Value extraction failed: {str(e)}"}
                     
                     schedule_inventory["day_schedules"].append(day_info)
@@ -1449,7 +1449,7 @@ class EnergyPlusManager:
                             if values:
                                 annual_info["values"] = values
                         except Exception as e:
-                            logger.warning(f"Failed to extract values for {annual_info['name']}: {e}")
+                            logger.warning("Failed to extract values for %s: %s", annual_info['name'], e)
                             annual_info["values"] = {"error": f"Value extraction failed: {str(e)}"}
                     
                     schedule_inventory["annual_schedules"].append(annual_info)
@@ -1511,12 +1511,12 @@ class EnergyPlusManager:
                 
                 schedule_inventory["summary"]["value_extraction"] = value_extraction_summary
             
-            logger.debug(f"Found {total_objects} schedule objects across {len(schedule_inventory['summary']['schedule_types_found'])} object types")
-            logger.info(f"Schedule inspection for {resolved_path} completed successfully")
+            logger.debug("Found %s schedule objects across %s object types", total_objects, len(schedule_inventory['summary']['schedule_types_found']))
+            logger.info("Schedule inspection for %s completed successfully", resolved_path)
             return json.dumps(schedule_inventory, indent=2)
             
         except Exception as e:
-            logger.error(f"Error inspecting schedules for {resolved_path}: {e}")
+            logger.error("Error inspecting schedules for %s: %s", resolved_path, e)
             raise RuntimeError(f"Error inspecting schedules: {str(e)}")
 
 
@@ -1528,7 +1528,7 @@ class EnergyPlusManager:
         resolved_path = self._resolve_idf_path(idf_path)
         
         try:
-            logger.debug(f"Discovering HVAC loops for: {resolved_path}")
+            logger.debug("Discovering HVAC loops for: %s", resolved_path)
             idf = IDF(resolved_path)
             
             hvac_info = {
@@ -1599,11 +1599,11 @@ class EnergyPlusManager:
                 "total_zones": len(zones)
             }
             
-            logger.debug(f"Found {len(plant_loops)} plant loops, {len(condenser_loops)} condenser loops, {len(air_loops)} air loops")
+            logger.debug("Found %s plant loops, %s condenser loops, %s air loops", len(plant_loops), len(condenser_loops), len(air_loops))
             return json.dumps(hvac_info, indent=2)
             
         except Exception as e:
-            logger.error(f"Error discovering HVAC loops for {resolved_path}: {e}")
+            logger.error("Error discovering HVAC loops for %s: %s", resolved_path, e)
             raise RuntimeError(f"Error discovering HVAC loops: {str(e)}")
 
 
@@ -1612,7 +1612,7 @@ class EnergyPlusManager:
         resolved_path = self._resolve_idf_path(idf_path)
         
         try:
-            logger.debug(f"Getting loop topology for '{loop_name}' in: {resolved_path}")
+            logger.debug("Getting loop topology for '%s' in: %s", loop_name, resolved_path)
             idf = IDF(resolved_path)
             
             # Try to find the loop in different loop types
@@ -1672,24 +1672,24 @@ class EnergyPlusManager:
                 # Handle Plant and Condenser loops (existing logic)
                 topology_info = self._get_plant_condenser_topology(idf, loop_obj, loop_type, loop_name)
             
-            logger.debug(f"Topology extracted for loop '{loop_name}' of type {loop_type}")
+            logger.debug("Topology extracted for loop '%s' of type %s", loop_name, loop_type)
             return json.dumps(topology_info, indent=2)
             
         except Exception as e:
-            logger.error(f"Error getting loop topology for {resolved_path}: {e}")
+            logger.error("Error getting loop topology for %s: %s", resolved_path, e)
             raise RuntimeError(f"Error getting loop topology: {str(e)}")
 
     def _get_airloop_topology(self, idf, loop_obj, loop_name: str) -> Dict[str, Any]:
         """Get topology information specifically for AirLoopHVAC systems"""
         
         # Debug: Print all available fields in the loop object
-        logger.debug(f"Loop object fields for {loop_name}:")
+        logger.debug("Loop object fields for %s:", loop_name)
         for field in dir(loop_obj):
             if not field.startswith('_'):
                 try:
                     value = getattr(loop_obj, field, None)
                     if isinstance(value, str) and value.strip():
-                        logger.debug(f"  {field}: {value}")
+                        logger.debug("  %s: %s", field, value)
                 except:
                     pass
         
@@ -1721,11 +1721,11 @@ class EnergyPlusManager:
             getattr(loop_obj, 'Supply_Side_Branch_List_Name', '') or
             getattr(loop_obj, 'Supply_Branch_List_Name', '')
         )
-        logger.debug(f"Branch list name from loop object: '{supply_branch_list_name}'")
+        logger.debug("Branch list name from loop object: '%s'", supply_branch_list_name)
         
         if supply_branch_list_name:
             supply_branches = self._get_branches_from_list(idf, supply_branch_list_name)
-            logger.debug(f"Found {len(supply_branches)} supply branches")
+            logger.debug("Found %s supply branches", len(supply_branches))
             topology_info["supply_side"]["branches"] = supply_branches
             
             # Also extract components from supply branches for easier access
@@ -1733,21 +1733,21 @@ class EnergyPlusManager:
             for branch in supply_branches:
                 components.extend(branch.get("components", []))
             topology_info["supply_side"]["components"] = components
-            logger.debug(f"Found {len(components)} supply components")
+            logger.debug("Found %s supply components", len(components))
         
         # Get AirLoopHVAC:SupplyPath objects - find by matching demand inlet node
         demand_inlet_node = topology_info["demand_side"]["inlet_node"]
-        logger.debug(f"Looking for supply paths with inlet node: '{demand_inlet_node}'")
+        logger.debug("Looking for supply paths with inlet node: '%s'", demand_inlet_node)
         supply_paths = self._get_airloop_supply_paths_by_node(idf, demand_inlet_node)
         topology_info["demand_side"]["supply_paths"] = supply_paths
-        logger.debug(f"Found {len(supply_paths)} supply paths")
+        logger.debug("Found %s supply paths", len(supply_paths))
         
         # Get AirLoopHVAC:ReturnPath objects - find by matching demand outlet node
         demand_outlet_node = topology_info["demand_side"]["outlet_node"]
-        logger.debug(f"Looking for return paths with outlet node: '{demand_outlet_node}'")
+        logger.debug("Looking for return paths with outlet node: '%s'", demand_outlet_node)
         return_paths = self._get_airloop_return_paths_by_node(idf, demand_outlet_node)
         topology_info["demand_side"]["return_paths"] = return_paths
-        logger.debug(f"Found {len(return_paths)} return paths")
+        logger.debug("Found %s return paths", len(return_paths))
         
         # Get zone splitters from supply paths
         zone_splitters = []
@@ -2097,7 +2097,7 @@ class EnergyPlusManager:
         resolved_path = self._resolve_idf_path(idf_path)
         
         try:
-            logger.info(f"Creating custom loop diagram for: {resolved_path}")
+            logger.info("Creating custom loop diagram for: %s", resolved_path)
             
             # Determine output path
             if output_path is None:
@@ -2109,18 +2109,18 @@ class EnergyPlusManager:
             try:
                 result = self._create_topology_based_diagram(resolved_path, loop_name, output_path, show_legend)
                 if result["success"]:
-                    logger.info(f"Custom topology diagram created: {output_path}")
+                    logger.info("Custom topology diagram created: %s", output_path)
                     return json.dumps(result, indent=2)
             except Exception as e:
-                logger.warning(f"Topology-based diagram failed: {e}. Using simplified approach.")
+                logger.warning("Topology-based diagram failed: %s. Using simplified approach.", e)
             
             # Method 2: Simplified diagram (LAST RESORT)
             result = self._create_simplified_diagram(resolved_path, loop_name, output_path, format)
-            logger.info(f"Simplified diagram created: {output_path}")
+            logger.info("Simplified diagram created: %s", output_path)
             return json.dumps(result, indent=2)
             
         except Exception as e:
-            logger.error(f"Error creating loop diagram for {resolved_path}: {e}")
+            logger.error("Error creating loop diagram for %s: %s", resolved_path, e)
             raise RuntimeError(f"Error creating loop diagram: {str(e)}")
 
 
@@ -2257,7 +2257,7 @@ class EnergyPlusManager:
         resolved_path = self._resolve_idf_path(idf_path)
         
         try:
-            logger.info(f"Modifying {object_type} settings for: {resolved_path}")
+            logger.info("Modifying %s settings for: %s", object_type, resolved_path)
             idf = IDF(resolved_path)
             
             # Determine output path
@@ -2285,7 +2285,7 @@ class EnergyPlusManager:
                 
                 for field_name, new_value in field_updates.items():
                     if field_name not in valid_fields:
-                        logger.warning(f"Invalid field name for SimulationControl: {field_name}")
+                        logger.warning("Invalid field name for SimulationControl: %s", field_name)
                         continue
                     
                     try:
@@ -2296,10 +2296,10 @@ class EnergyPlusManager:
                             "old_value": old_value,
                             "new_value": new_value
                         })
-                        logger.debug(f"Updated {field_name}: {old_value} -> {new_value}")
+                        logger.debug("Updated %s: %s -> %s", field_name, old_value, new_value)
                     except Exception as e:
-                        logger.error(f"Error setting {field_name} to {new_value}: {e}")
-            
+                        logger.error("Error setting %s to %s: %s", field_name, new_value, e)
+
             elif object_type == "RunPeriod":
                 run_objs = idf.idfobjects.get("RunPeriod", [])
                 if not run_objs:
@@ -2321,7 +2321,7 @@ class EnergyPlusManager:
                 
                 for field_name, new_value in field_updates.items():
                     if field_name not in valid_fields:
-                        logger.warning(f"Invalid field name for RunPeriod: {field_name}")
+                        logger.warning("Invalid field name for RunPeriod: %s", field_name)
                         continue
                     
                     try:
@@ -2332,10 +2332,10 @@ class EnergyPlusManager:
                             "old_value": old_value,
                             "new_value": new_value
                         })
-                        logger.debug(f"Updated {field_name}: {old_value} -> {new_value}")
+                        logger.debug("Updated %s: %s -> %s", field_name, old_value, new_value)
                     except Exception as e:
-                        logger.error(f"Error setting {field_name} to {new_value}: {e}")
-            
+                        logger.error("Error setting %s to %s: %s", field_name, new_value, e)
+
             else:
                 raise ValueError(f"Invalid object_type: {object_type}. Must be 'SimulationControl' or 'RunPeriod'")
             
@@ -2352,11 +2352,11 @@ class EnergyPlusManager:
                 "total_modifications": len(modifications_made)
             }
             
-            logger.info(f"Successfully modified {object_type} and saved to: {output_path}")
+            logger.info("Successfully modified %s and saved to: %s", object_type, output_path)
             return json.dumps(result, indent=2)
-            
+
         except Exception as e:
-            logger.error(f"Error modifying simulation settings for {resolved_path}: {e}")
+            logger.error("Error modifying simulation settings for %s: %s", resolved_path, e)
             raise RuntimeError(f"Error modifying simulation settings: {str(e)}")
 
 
@@ -2392,7 +2392,7 @@ class EnergyPlusManager:
             elif location.casefold() == "roof":
                 all_surfs.extend(idf.idfobjects['Roof'])
             else:
-                logger.error(f"location input must be wall or roof: currently '{location}'")
+                logger.error("location input must be wall or roof: currently '%s'", location)
             ext_surfs = [x for x in all_surfs if (x.Surface_Type.casefold() == location.casefold() and
                                                     x.Outside_Boundary_Condition.casefold() == "Outdoors".casefold())]
             if location.casefold() == "wall":
@@ -2405,7 +2405,7 @@ class EnergyPlusManager:
             materials = idf.idfobjects['Material']
             materials.extend(idf.idfobjects['Material:NoMass'])
             ext_layers = [x for x in materials if x.Name in ext_layer_names]
-            logger.debug(f"Found {len(ext_layers)} exterior layers for {location} surfaces: {ext_surf_names}")
+            logger.debug("Found %s exterior layers for %s surfaces: %s", len(ext_layers), location, ext_surf_names)
             logger.debug("construction names: {}".format(construction_names))
             logger.debug("exterior layer names: {}".format(ext_layer_names))
 
@@ -2430,7 +2430,7 @@ class EnergyPlusManager:
                         "new_value": new_value
                     })
                 except Exception as e:
-                    logger.error(f"Error setting Solar and Thermal Absorptance of {ext_layer.Name}: {e}")
+                    logger.error("Error setting Solar and Thermal Absorptance of %s: %s", ext_layer.Name, e)
 
             # Save the modified IDF
             idf.save(output_path)
@@ -2445,11 +2445,11 @@ class EnergyPlusManager:
                 "total_modifications": len(modifications_made)
             }
             
-            logger.info(f"Successfully modified exterior coating and saved to: {output_path}")
+            logger.info("Successfully modified exterior coating and saved to: %s", output_path)
             return json.dumps(result, indent=2)
             
         except Exception as e:
-            logger.error(f"Error modifying exterior coating for {resolved_path}: {e}")
+            logger.error("Error modifying exterior coating for %s: %s", resolved_path, e)
             raise RuntimeError(f"Error modifying exterior coating: {str(e)}")
 
 
@@ -2492,9 +2492,9 @@ class EnergyPlusManager:
             non_window_surfs = idf.idfobjects['BuildingSurface:Detailed']
             exterior_surf_names = [x.Name for x in non_window_surfs if x.Outside_Boundary_Condition.casefold() == "Outdoors".casefold()]
             ext_window_surfs = [x for x in window_surfs if x.Building_Surface_Name in exterior_surf_names]
-            logger.debug(f"exterior surfaces: {exterior_surf_names}")
-            logger.debug(f"window surfaces: {[x.Name for x in window_surfs]}")
-            logger.debug(f"Found {len(ext_window_surfs)} exterior window surfaces")
+            logger.debug("exterior surfaces: %s", exterior_surf_names)
+            logger.debug("window surfaces: %s", [x.Name for x in window_surfs])
+            logger.debug("Found %s exterior window surfaces", len(ext_window_surfs))
 
             # create window film object
             window_film_name = 'outside_window_film_{}'.format(generate_random_string(10))
@@ -2502,7 +2502,7 @@ class EnergyPlusManager:
             setattr(window_film, 'UFactor', u_value)
             setattr(window_film, 'Solar_Heat_Gain_Coefficient', shgc)
             setattr(window_film, 'Visible_Transmittance', visible_transmittance)
-            logger.debug(f"create window film: {window_film_name}")
+            logger.debug("create window film: %s", window_film_name)
 
             # create window fillm construction
             window_film_construction_name = 'cons_' + window_film_name
@@ -2511,7 +2511,7 @@ class EnergyPlusManager:
             # print("construction name: {}, outside layer: {}".format(window_film_construction_name, window_film_name))
 
             for surf in ext_window_surfs:
-                logger.debug(f"Updating surface: {surf.Name}")
+                logger.debug("Updating surface: %s", surf.Name)
                 try:
                     old_value = getattr(surf, 'Construction_Name')
                     new_value = window_film_construction_name
@@ -2522,11 +2522,11 @@ class EnergyPlusManager:
                         "old_value": old_value,
                         "new_value": new_value
                     })
-                    logger.debug(f"Updated Construction_Name of {surf.Name}: {old_value} -> {new_value}")
+                    logger.debug("Updated Construction_Name of %s: %s -> %s", surf.Name, old_value, new_value)
                 except Exception as e:
-                    logger.error(f"Error setting Construction_Name of {surf.Name} to {new_value}: {e}")
+                    logger.error("Error setting Construction_Name of %s to %s: %s", surf.Name, new_value, e)
             if (len(ext_window_surfs) > 1):
-                logger.debug(f"change construction of {ext_window_surfs[0].Name} to {window_film_construction_name}")
+                logger.debug("change construction of %s to %s", ext_window_surfs[0].Name, window_film_construction_name)
 
             # Save the modified IDF
             idf.save(output_path)
@@ -2542,11 +2542,11 @@ class EnergyPlusManager:
                 "total_modifications": len(modifications_made)
             }
             
-            logger.info(f"Successfully modified {window_film_construction_name} and saved to: {output_path}")
+            logger.info("Successfully modified %s and saved to: %s", window_film_construction_name, output_path)
             return json.dumps(result, indent=2)
             
         except Exception as e:
-            logger.error(f"Error modifying window film properties for {resolved_path}: {e}")
+            logger.error("Error modifying window film properties for %s: %s", resolved_path, e)
             raise RuntimeError(f"Error modifying window film properties: {str(e)}")
 
 
@@ -2602,9 +2602,9 @@ class EnergyPlusManager:
                         "old_value": old_value,
                         "new_value": new_value
                     })
-                    logger.debug(f"Updated {flow_field}: {old_value} -> {new_value}")
+                    logger.debug("Updated %s: %s -> %s", flow_field, old_value, new_value)
                 except Exception as e:
-                    logger.error(f"Error setting {flow_field} to {new_value}: {e}")
+                    logger.error("Error setting %s to %s: %s", flow_field, new_value, e)
 
             # Save the modified IDF
             idf.save(output_path)
@@ -2618,11 +2618,11 @@ class EnergyPlusManager:
                 "total_modifications": len(modifications_made)
             }
             
-            logger.info(f"Successfully modified {object_type} and saved to: {output_path}")
+            logger.info("Successfully modified %s and saved to: %s", object_type, output_path)
             return json.dumps(result, indent=2)
-            
+
         except Exception as e:
-            logger.error(f"Error modifying infiltration rate for {resolved_path}: {e}")
+            logger.error("Error modifying infiltration rate for %s: %s", resolved_path, e)
             raise RuntimeError(f"Error modifying infiltration rate: {str(e)}")
     
     
@@ -2649,13 +2649,13 @@ class EnergyPlusManager:
             resolved_idf_path = self._resolve_idf_path(idf_path)
             
             try:
-                logger.info(f"Starting simulation for: {resolved_idf_path}")
+                logger.info("Starting simulation for: %s", resolved_idf_path)
                 
                 # Resolve weather file path
                 resolved_weather_path = None
                 if weather_file:
                     resolved_weather_path = self._resolve_weather_file_path(weather_file)
-                    logger.info(f"Using weather file: {resolved_weather_path}")
+                    logger.info("Using weather file: %s", resolved_weather_path)
                 
                 # Set up output directory
                 if output_directory is None:
@@ -2665,7 +2665,7 @@ class EnergyPlusManager:
                 
                 # Create output directory if it doesn't exist
                 os.makedirs(output_directory, exist_ok=True)
-                logger.info(f"Output directory: {output_directory}")
+                logger.info("Output directory: %s", output_directory)
                 
                 # Load IDF file
                 if resolved_weather_path:
@@ -2711,7 +2711,7 @@ class EnergyPlusManager:
                     'weather': resolved_weather_path
                 }
                 
-                logger.info(f"Running EnergyPlus: {' '.join(cmd)}")
+                logger.info("Running EnergyPlus: %s", ' '.join(cmd))
                 start_time = datetime.now()
                 
                 try:
@@ -2729,9 +2729,9 @@ class EnergyPlusManager:
                     
                     # Log to file, not stdout
                     if process.stdout:
-                        logger.debug(f"EnergyPlus stdout:\n{process.stdout[:1000]}")
+                        logger.debug("EnergyPlus stdout:\n%s", process.stdout[:1000])
                     if process.stderr:
-                        logger.debug(f"EnergyPlus stderr:\n{process.stderr[:1000]}")
+                        logger.debug("EnergyPlus stderr:\n%s", process.stderr[:1000])
                     
                     success = process.returncode == 0
                     output_files = self._find_simulation_outputs(output_directory)
@@ -2751,13 +2751,13 @@ class EnergyPlusManager:
                     if not success:
                         simulation_result["stderr"] = process.stderr[:2000] if process.stderr else None
                     
-                    logger.info(f"Simulation completed in {duration}")
+                    logger.info("Simulation completed in %s", duration)
                     return json.dumps(simulation_result, indent=2)
                     
                 except subprocess.TimeoutExpired:
                     end_time = datetime.now()
                     duration = end_time - start_time
-                    logger.error(f"Simulation timed out after {self.config.server.simulation_timeout}s")
+                    logger.error("Simulation timed out after %ss", self.config.server.simulation_timeout)
                     simulation_result = {
                         "success": False,
                         "input_idf": resolved_idf_path,
@@ -2791,11 +2791,11 @@ class EnergyPlusManager:
                         "timestamp": datetime.now().isoformat()
                     }
                     
-                    logger.error(f"Simulation failed: {str(e)}")
+                    logger.error("Simulation failed: %s", e)
                     return json.dumps(simulation_result, indent=2)
                     
             except Exception as e:
-                logger.error(f"Error setting up simulation for {resolved_idf_path}: {e}")
+                logger.error("Error setting up simulation for %s: %s", resolved_idf_path, e)
                 raise RuntimeError(f"Error running simulation: {str(e)}")
         
 
@@ -2900,7 +2900,7 @@ class EnergyPlusManager:
         }
 
         try:
-            logger.info(f"Converting output units in: {output_directory}")
+            logger.info("Converting output units in: %s", output_directory)
 
             output_dir = Path(output_directory)
             if not output_dir.exists():
@@ -2951,7 +2951,7 @@ class EnergyPlusManager:
             if not csv_file or not csv_file.exists():
                 raise FileNotFoundError(f"Output CSV file not found. Checked: {meter_file}, {variable_file}")
 
-            logger.info(f"Processing {data_type} file: {csv_file}")
+            logger.info("Processing %s file: %s", data_type, csv_file)
 
             # Read CSV file
             df = pd.read_csv(csv_file)
@@ -3012,7 +3012,7 @@ class EnergyPlusManager:
             if save_converted and conversions_made:
                 converted_file_path = str(output_dir / f"{idf_name}_converted.csv")
                 df.to_csv(converted_file_path, index=False)
-                logger.info(f"Saved converted file: {converted_file_path}")
+                logger.info("Saved converted file: %s", converted_file_path)
 
             # Calculate summary statistics for converted columns
             summary_stats = {}
@@ -3041,11 +3041,11 @@ class EnergyPlusManager:
                 "converted_file": converted_file_path
             }
 
-            logger.info(f"Converted {len(conversions_made)} columns to natural units")
+            logger.info("Converted %s columns to natural units", len(conversions_made))
             return json.dumps(result, indent=2)
 
         except Exception as e:
-            logger.error(f"Error converting output units: {e}")
+            logger.error("Error converting output units: %s", e)
             raise RuntimeError(f"Error converting output units: {str(e)}")
 
     # ------------------------ Post-Processing and Visualization ------------------------
@@ -3064,7 +3064,7 @@ class EnergyPlusManager:
             JSON string with plot creation results
         """
         try:
-            logger.info(f"Creating interactive plot from: {output_directory}")
+            logger.info("Creating interactive plot from: %s", output_directory)
             
             output_dir = Path(output_directory)
             if not output_dir.exists():
@@ -3110,7 +3110,7 @@ class EnergyPlusManager:
             if not csv_file or not csv_file.exists():
                 raise FileNotFoundError(f"Output CSV file not found. Checked: {meter_file}, {variable_file}")
             
-            logger.info(f"Processing {data_type} file: {csv_file}")
+            logger.info("Processing %s file: %s", data_type, csv_file)
             
             # Read CSV file
             df = pd.read_csv(csv_file)
@@ -3173,7 +3173,7 @@ class EnergyPlusManager:
                         logger.warning("DateTime parsing failed, using index")
                         
                 except Exception as e:
-                    logger.warning(f"DateTime parsing error: {e}, falling back to index")
+                    logger.warning("DateTime parsing error: %s, falling back to index", e)
             
             # Fallback to simple version if datetime parsing failed
             if not datetime_parsed:
@@ -3234,11 +3234,11 @@ class EnergyPlusManager:
                 "title": title
             }
             
-            logger.info(f"Interactive plot created: {html_path}")
+            logger.info("Interactive plot created: %s", html_path)
             return json.dumps(result, indent=2)
             
         except Exception as e:
-            logger.error(f"Error creating interactive plot: {e}")
+            logger.error("Error creating interactive plot: %s", e)
             raise RuntimeError(f"Error creating interactive plot: {str(e)}")
 
     def _get_branches_from_list(self, idf, branch_list_name: str) -> List[Dict[str, Any]]:

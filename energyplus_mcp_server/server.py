@@ -40,7 +40,7 @@ mcp = FastMCP(config.server.name)
 # Initialize EnergyPlus manager with configuration
 ep_manager = EnergyPlusManager(config)
 
-logger.info(f"EnergyPlus MCP Server '{config.server.name}' v{config.server.version} initialized")
+logger.info("EnergyPlus MCP Server '%s' v%s initialized", config.server.name, config.server.version)
 
 
 @mcp.tool()
@@ -78,15 +78,15 @@ async def copy_file(source_path: str, target_path: str, overwrite: bool = False,
         copy_file("san francisco", "my_weather.epw", file_types=[".epw"])
     """
     try:
-        logger.info(f"Copying file: '{source_path}' -> '{target_path}' (overwrite={overwrite}, file_types={file_types})")
+        logger.info("Copying file: '%s' -> '%s' (overwrite=%s, file_types=%s)", source_path, target_path, overwrite, file_types)
         result = ep_manager.copy_file(source_path, target_path, overwrite, file_types)
-        return f"File copy operation completed:\n{result}"
+        return result
     except ValueError as e:
-        logger.warning(f"Invalid arguments for copy_file: {str(e)}")
-        return f"Invalid arguments: {str(e)}"
+        logger.warning("Invalid arguments for copy_file: %s", e)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Unexpected error copying file: {str(e)}")
-        return f"Error copying file: {str(e)}"
+        logger.error("Unexpected error copying file: %s", e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -101,18 +101,18 @@ async def load_idf_model(idf_path: str) -> str:
         JSON string with model information and loading status
     """
     try:
-        logger.info(f"Loading IDF model: {idf_path}")
+        logger.info("Loading IDF model: %s", idf_path)
         result = ep_manager.load_idf(idf_path)
-        return f"Successfully loaded IDF: {result['original_path']}\nModel info: {result}"
+        return json.dumps(result, indent=2)
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except ValueError as e:
-        logger.warning(f"Invalid input for load_idf_model: {str(e)}")
-        return f"Invalid input: {str(e)}"
+        logger.warning("Invalid input for load_idf_model: %s", e)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Unexpected error loading IDF {idf_path}: {str(e)}")
-        return f"Error loading IDF {idf_path}: {str(e)}"
+        logger.error("Unexpected error loading IDF %s: %s", idf_path, e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -127,15 +127,15 @@ async def get_model_summary(idf_path: str) -> str:
         JSON string with model summary information
     """
     try:
-        logger.info(f"Getting model summary: {idf_path}")
+        logger.info("Getting model summary: %s", idf_path)
         summary = ep_manager.get_model_basics(idf_path)
-        return f"Model Summary for {idf_path}:\n{summary}"
+        return summary
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error getting model summary for {idf_path}: {str(e)}")
-        return f"Error getting model summary for {idf_path}: {str(e)}"
+        logger.error("Error getting model summary for %s: %s", idf_path, e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -150,15 +150,15 @@ async def check_simulation_settings(idf_path: str) -> str:
         JSON string with current settings and descriptions of modifiable fields
     """
     try:
-        logger.info(f"Checking simulation settings: {idf_path}")
+        logger.info("Checking simulation settings: %s", idf_path)
         settings = ep_manager.check_simulation_settings(idf_path)
-        return f"Simulation settings for {idf_path}:\n{settings}"
+        return settings
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error checking simulation settings for {idf_path}: {str(e)}")
-        return f"Error checking simulation settings for {idf_path}: {str(e)}"
+        logger.error("Error checking simulation settings for %s: %s", idf_path, e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -174,15 +174,15 @@ async def inspect_schedules(idf_path: str, include_values: bool = False) -> str:
         JSON string with detailed schedule inventory and analysis
     """
     try:
-        logger.info(f"Inspecting schedules: {idf_path} (include_values={include_values})")
+        logger.info("Inspecting schedules: %s (include_values=%s)", idf_path, include_values)
         schedules_info = ep_manager.inspect_schedules(idf_path, include_values)
-        return f"Schedule inspection for {idf_path}:\n{schedules_info}"
+        return schedules_info
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error inspecting schedules for {idf_path}: {str(e)}")
-        return f"Error inspecting schedules for {idf_path}: {str(e)}"
+        logger.error("Error inspecting schedules for %s: %s", idf_path, e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -201,15 +201,15 @@ async def inspect_people(idf_path: str) -> str:
         - Summary statistics by zone and calculation method
     """
     try:
-        logger.info(f"Inspecting People objects: {idf_path}")
+        logger.info("Inspecting People objects: %s", idf_path)
         result = ep_manager.inspect_people(idf_path)
-        return f"People objects inspection for {idf_path}:\n{result}"
+        return result
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error inspecting People objects for {idf_path}: {str(e)}")
-        return f"Error inspecting People objects for {idf_path}: {str(e)}"
+        logger.error("Error inspecting People objects for %s: %s", idf_path, e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -283,18 +283,18 @@ async def modify_people(
         ])
     """
     try:
-        logger.info(f"Modifying People objects: {idf_path}")
+        logger.info("Modifying People objects: %s", idf_path)
         result = ep_manager.modify_people(idf_path, modifications, output_path)
-        return f"People modification results:\n{result}"
+        return result
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except ValueError as e:
-        logger.warning(f"Invalid input for modify_people: {str(e)}")
-        return f"Invalid input: {str(e)}"
+        logger.warning("Invalid input for modify_people: %s", e)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error modifying People objects for {idf_path}: {str(e)}")
-        return f"Error modifying People objects for {idf_path}: {str(e)}"
+        logger.error("Error modifying People objects for %s: %s", idf_path, e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -313,15 +313,15 @@ async def inspect_lights(idf_path: str) -> str:
         - Summary statistics by zone and calculation method
     """
     try:
-        logger.info(f"Inspecting Lights objects: {idf_path}")
+        logger.info("Inspecting Lights objects: %s", idf_path)
         result = ep_manager.inspect_lights(idf_path)
-        return f"Lights objects inspection for {idf_path}:\n{result}"
+        return result
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error inspecting Lights objects for {idf_path}: {str(e)}")
-        return f"Error inspecting Lights objects for {idf_path}: {str(e)}"
+        logger.error("Error inspecting Lights objects for %s: %s", idf_path, e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -397,18 +397,18 @@ async def modify_lights(
         ])
     """
     try:
-        logger.info(f"Modifying Lights objects: {idf_path}")
+        logger.info("Modifying Lights objects: %s", idf_path)
         result = ep_manager.modify_lights(idf_path, modifications, output_path)
-        return f"Lights modification results:\n{result}"
+        return result
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except ValueError as e:
-        logger.warning(f"Invalid input for modify_lights: {str(e)}")
-        return f"Invalid input: {str(e)}"
+        logger.warning("Invalid input for modify_lights: %s", e)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error modifying Lights objects for {idf_path}: {str(e)}")
-        return f"Error modifying Lights objects for {idf_path}: {str(e)}"
+        logger.error("Error modifying Lights objects for %s: %s", idf_path, e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -427,15 +427,15 @@ async def inspect_electric_equipment(idf_path: str) -> str:
         - Summary statistics by zone and calculation method
     """
     try:
-        logger.info(f"Inspecting ElectricEquipment objects: {idf_path}")
+        logger.info("Inspecting ElectricEquipment objects: %s", idf_path)
         result = ep_manager.inspect_electric_equipment(idf_path)
-        return f"ElectricEquipment objects inspection for {idf_path}:\n{result}"
+        return result
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error inspecting ElectricEquipment objects for {idf_path}: {str(e)}")
-        return f"Error inspecting ElectricEquipment objects for {idf_path}: {str(e)}"
+        logger.error("Error inspecting ElectricEquipment objects for %s: %s", idf_path, e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -505,18 +505,18 @@ async def modify_electric_equipment(
         ])
     """
     try:
-        logger.info(f"Modifying ElectricEquipment objects: {idf_path}")
+        logger.info("Modifying ElectricEquipment objects: %s", idf_path)
         result = ep_manager.modify_electric_equipment(idf_path, modifications, output_path)
-        return f"ElectricEquipment modification results:\n{result}"
+        return result
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except ValueError as e:
-        logger.warning(f"Invalid input for modify_electric_equipment: {str(e)}")
-        return f"Invalid input: {str(e)}"
+        logger.warning("Invalid input for modify_electric_equipment: %s", e)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error modifying ElectricEquipment objects for {idf_path}: {str(e)}")
-        return f"Error modifying ElectricEquipment objects for {idf_path}: {str(e)}"
+        logger.error("Error modifying ElectricEquipment objects for %s: %s", idf_path, e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -537,7 +537,7 @@ async def modify_simulation_control(
         JSON string with modification results
     """
     try:
-        logger.info(f"Modifying SimulationControl: {idf_path}")
+        logger.info("Modifying SimulationControl: %s", idf_path)
         
         # No need to parse JSON since we're receiving a dict directly
         result = ep_manager.modify_simulation_settings(
@@ -546,13 +546,13 @@ async def modify_simulation_control(
             field_updates=field_updates,  # Pass the dict directly
             output_path=output_path
         )
-        return f"SimulationControl modification results:\n{result}"
+        return result
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error modifying SimulationControl for {idf_path}: {str(e)}")
-        return f"Error modifying SimulationControl for {idf_path}: {str(e)}"
+        logger.error("Error modifying SimulationControl for %s: %s", idf_path, e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -575,7 +575,7 @@ async def modify_run_period(
         JSON string with modification results
     """
     try:
-        logger.info(f"Modifying RunPeriod: {idf_path}")
+        logger.info("Modifying RunPeriod: %s", idf_path)
         
         # No need to parse JSON since we're receiving a dict directly
         result = ep_manager.modify_simulation_settings(
@@ -585,13 +585,13 @@ async def modify_run_period(
             run_period_index=run_period_index,
             output_path=output_path
         )
-        return f"RunPeriod modification results:\n{result}"
+        return result
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error modifying RunPeriod for {idf_path}: {str(e)}")
-        return f"Error modifying RunPeriod for {idf_path}: {str(e)}"
+        logger.error("Error modifying RunPeriod for %s: %s", idf_path, e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -612,7 +612,7 @@ async def change_infiltration_by_mult(
         JSON string with modification results
     """
     try:
-        logger.info(f"Modifying Infiltration: {idf_path}")
+        logger.info("Modifying Infiltration: %s", idf_path)
         
         # No need to parse JSON since we're receiving a dict directly
         result = ep_manager.change_infiltration_by_mult(
@@ -620,13 +620,13 @@ async def change_infiltration_by_mult(
             mult=mult,  # Pass the float directly
             output_path=output_path
         )
-        return f"Infiltration modification results:\n{result}"
+        return result
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error Infiltration modification for {idf_path}: {str(e)}")
-        return f"Error Infiltration modification for {idf_path}: {str(e)}"
+        logger.error("Error Infiltration modification for %s: %s", idf_path, e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -651,7 +651,7 @@ async def add_window_film_outside(
         JSON string with modification results
     """
     try:
-        logger.info(f"Adding window film to exterior windows: {idf_path}")
+        logger.info("Adding window film to exterior windows: %s", idf_path)
         result = ep_manager.add_window_film_outside(
             idf_path=idf_path,
             u_value=u_value,
@@ -659,13 +659,13 @@ async def add_window_film_outside(
             visible_transmittance=visible_transmittance,
             output_path=output_path
         )
-        return f"Window film modification results:\n{result}"
+        return result
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error adding window film for {idf_path}: {str(e)}")
-        return f"Error adding window film for {idf_path}: {str(e)}"
+        logger.error("Error adding window film for %s: %s", idf_path, e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -690,7 +690,7 @@ async def add_coating_outside(
         JSON string with modification results
     """
     try:
-        logger.info(f"Adding exterior coating to {location} surfaces: {idf_path}")
+        logger.info("Adding exterior coating to %s surfaces: %s", location, idf_path)
         result = ep_manager.add_coating_outside(
             idf_path=idf_path,
             location=location,
@@ -698,16 +698,16 @@ async def add_coating_outside(
             thermal_abs=thermal_abs,
             output_path=output_path
         )
-        return f"Exterior coating modification results:\n{result}"
+        return result
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except ValueError as e:
-        logger.warning(f"Invalid location parameter: {location}")
-        return f"Invalid location (must be 'wall' or 'roof'): {str(e)}"
+        logger.warning("Invalid location parameter: %s", location)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error adding exterior coating for {idf_path}: {str(e)}")
-        return f"Error adding exterior coating for {idf_path}: {str(e)}"
+        logger.error("Error adding exterior coating for %s: %s", idf_path, e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -722,15 +722,15 @@ async def list_zones(idf_path: str) -> str:
         JSON string with detailed zone information
     """
     try:
-        logger.info(f"Listing zones: {idf_path}")
+        logger.info("Listing zones: %s", idf_path)
         zones = ep_manager.list_zones(idf_path)
-        return f"Zones in {idf_path}:\n{zones}"
+        return zones
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error listing zones for {idf_path}: {str(e)}")
-        return f"Error listing zones for {idf_path}: {str(e)}"
+        logger.error("Error listing zones for %s: %s", idf_path, e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -745,15 +745,15 @@ async def get_surfaces(idf_path: str) -> str:
         JSON string with surface details
     """
     try:
-        logger.info(f"Getting surfaces: {idf_path}")
+        logger.info("Getting surfaces: %s", idf_path)
         surfaces = ep_manager.get_surfaces(idf_path)
-        return f"Surfaces in {idf_path}:\n{surfaces}"
+        return surfaces
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error getting surfaces for {idf_path}: {str(e)}")
-        return f"Error getting surfaces for {idf_path}: {str(e)}"
+        logger.error("Error getting surfaces for %s: %s", idf_path, e)
+        return json.dumps({"error": str(e)})
 
 @mcp.tool()
 async def get_materials(idf_path: str) -> str:
@@ -767,15 +767,15 @@ async def get_materials(idf_path: str) -> str:
         JSON string with material details
     """
     try:
-        logger.info(f"Getting materials: {idf_path}")
+        logger.info("Getting materials: %s", idf_path)
         materials = ep_manager.get_materials(idf_path)
-        return f"Materials in {idf_path}:\n{materials}"
+        return materials
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error getting materials for {idf_path}: {str(e)}")
-        return f"Error getting materials for {idf_path}: {str(e)}"
+        logger.error("Error getting materials for %s: %s", idf_path, e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -790,15 +790,15 @@ async def validate_idf(idf_path: str) -> str:
         JSON string with validation results, warnings, and errors
     """
     try:
-        logger.info(f"Validating IDF: {idf_path}")
+        logger.info("Validating IDF: %s", idf_path)
         validation_result = ep_manager.validate_idf(idf_path)
-        return f"Validation results for {idf_path}:\n{validation_result}"
+        return validation_result
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error validating IDF {idf_path}: {str(e)}")
-        return f"Error validating IDF {idf_path}: {str(e)}"
+        logger.error("Error validating IDF %s: %s", idf_path, e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -818,18 +818,18 @@ async def get_output_variables(idf_path: str, discover_available: bool = False, 
         When discover_available=False, shows only currently configured Output:Variable and Output:Meter objects.
     """
     try:
-        logger.info(f"Getting output variables: {idf_path} (discover_available={discover_available})")
+        logger.info("Getting output variables: %s (discover_available=%s)", idf_path, discover_available)
         result = ep_manager.get_output_variables(idf_path, discover_available, run_days)
         
         mode = "available variables discovery" if discover_available else "configured variables"
-        return f"Output variables ({mode}) for {idf_path}:\n{result}"
+        return result
         
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error getting output variables for {idf_path}: {str(e)}")
-        return f"Error getting output variables for {idf_path}: {str(e)}"
+        logger.error("Error getting output variables for %s: %s", idf_path, e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -849,18 +849,18 @@ async def get_output_meters(idf_path: str, discover_available: bool = False, run
         When discover_available=False, shows only currently configured Output:Meter objects.
     """
     try:
-        logger.info(f"Getting output meters: {idf_path} (discover_available={discover_available})")
+        logger.info("Getting output meters: %s (discover_available=%s)", idf_path, discover_available)
         result = ep_manager.get_output_meters(idf_path, discover_available, run_days)
         
         mode = "available meters discovery" if discover_available else "configured meters"
-        return f"Output meters ({mode}) for {idf_path}:\n{result}"
+        return result
         
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error getting output meters for {idf_path}: {str(e)}")
-        return f"Error getting output meters for {idf_path}: {str(e)}"
+        logger.error("Error getting output meters for %s: %s", idf_path, e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -905,7 +905,7 @@ async def add_output_variables(
         ], validation_level="strict")
     """
     try:
-        logger.info(f"Adding output variables: {idf_path} ({len(variables)} variables, {validation_level} validation)")
+        logger.info("Adding output variables: %s (%s variables, %s validation)", idf_path, len(variables), validation_level)
         
         result = ep_manager.add_output_variables(
             idf_path=idf_path,
@@ -915,17 +915,17 @@ async def add_output_variables(
             output_path=output_path
         )
         
-        return f"Output variables addition results:\n{result}"
+        return result
         
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except ValueError as e:
-        logger.warning(f"Invalid arguments for add_output_variables: {str(e)}")
-        return f"Invalid arguments: {str(e)}"
+        logger.warning("Invalid arguments for add_output_variables: %s", e)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error adding output variables: {str(e)}")
-        return f"Error adding output variables: {str(e)}"
+        logger.error("Error adding output variables: %s", e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -971,7 +971,7 @@ async def add_output_meters(
         ], validation_level="strict")
     """
     try:
-        logger.info(f"Adding output meters: {idf_path} ({len(meters)} meters, {validation_level} validation)")
+        logger.info("Adding output meters: %s (%s meters, %s validation)", idf_path, len(meters), validation_level)
         
         result = ep_manager.add_output_meters(
             idf_path=idf_path,
@@ -981,17 +981,17 @@ async def add_output_meters(
             output_path=output_path
         )
         
-        return f"Output meters addition results:\n{result}"
+        return result
         
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except ValueError as e:
-        logger.warning(f"Invalid arguments for add_output_meters: {str(e)}")
-        return f"Invalid arguments: {str(e)}"
+        logger.warning("Invalid arguments for add_output_meters: %s", e)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error adding output meters: {str(e)}")
-        return f"Error adding output meters: {str(e)}"
+        logger.error("Error adding output meters: %s", e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -1010,12 +1010,12 @@ async def list_available_files(
         JSON string with available files organized by source and type. Always includes sample_files directory.
     """
     try:
-        logger.info(f"Listing available files (example_files={include_example_files}, weather_data={include_weather_data})")
+        logger.info("Listing available files (example_files=%s, weather_data=%s)", include_example_files, include_weather_data)
         files = ep_manager.list_available_files(include_example_files, include_weather_data)
-        return f"Available files:\n{files}"
+        return files
     except Exception as e:
-        logger.error(f"Error listing available files: {str(e)}")
-        return f"Error listing available files: {str(e)}"
+        logger.error("Error listing available files: %s", e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -1029,10 +1029,10 @@ async def get_server_configuration() -> str:
     try:
         logger.info("Getting server configuration")
         config_info = ep_manager.get_configuration_info()
-        return f"Current server configuration:\n{config_info}"
+        return config_info
     except Exception as e:
-        logger.error(f"Error getting configuration: {str(e)}")
-        return f"Error getting configuration: {str(e)}"
+        logger.error("Error getting configuration: %s", e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -1069,12 +1069,11 @@ async def get_server_status() -> str:
             }
         }
         
-        import json
-        return f"Server status:\n{json.dumps(status_info, indent=2)}"
+        return json.dumps(status_info, indent=2)
         
     except Exception as e:
-        logger.error(f"Error getting server status: {str(e)}")
-        return f"Error getting server status: {str(e)}"
+        logger.error("Error getting server status: %s", e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -1089,15 +1088,15 @@ async def discover_hvac_loops(idf_path: str) -> str:
         JSON string with all HVAC loops found, organized by type
     """
     try:
-        logger.info(f"Discovering HVAC loops: {idf_path}")
+        logger.info("Discovering HVAC loops: %s", idf_path)
         loops = ep_manager.discover_hvac_loops(idf_path)
-        return f"HVAC loops discovered in {idf_path}:\n{loops}"
+        return loops
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error discovering HVAC loops for {idf_path}: {str(e)}")
-        return f"Error discovering HVAC loops for {idf_path}: {str(e)}"
+        logger.error("Error discovering HVAC loops for %s: %s", idf_path, e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -1113,18 +1112,18 @@ async def get_loop_topology(idf_path: str, loop_name: str) -> str:
         JSON string with detailed loop topology including supply/demand sides, branches, and components
     """
     try:
-        logger.info(f"Getting loop topology for '{loop_name}': {idf_path}")
+        logger.info("Getting loop topology for '%s': %s", loop_name, idf_path)
         topology = ep_manager.get_loop_topology(idf_path, loop_name)
-        return f"Loop topology for '{loop_name}' in {idf_path}:\n{topology}"
+        return topology
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except ValueError as e:
-        logger.warning(f"Loop not found: {loop_name}")
-        return f"Loop not found: {str(e)}"
+        logger.warning("Loop not found: %s", loop_name)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error getting loop topology for {idf_path}: {str(e)}")
-        return f"Error getting loop topology for {idf_path}: {str(e)}"
+        logger.error("Error getting loop topology for %s: %s", idf_path, e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -1149,15 +1148,15 @@ async def visualize_loop_diagram(
         JSON string with diagram generation results and file path
     """
     try:
-        logger.info(f"Creating loop diagram for '{loop_name or 'all loops'}': {idf_path} (show_legend={show_legend})")
+        logger.info("Creating loop diagram for '%s': %s (show_legend=%s)", loop_name or 'all loops', idf_path, show_legend)
         result = ep_manager.visualize_loop_diagram(idf_path, loop_name, output_path, format, show_legend)
-        return f"Loop diagram created:\n{result}"
+        return result
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error creating loop diagram for {idf_path}: {str(e)}")
-        return f"Error creating loop diagram for {idf_path}: {str(e)}"
+        logger.error("Error creating loop diagram for %s: %s", idf_path, e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -1186,9 +1185,9 @@ async def run_energyplus_simulation(
         JSON string with simulation results, duration, and output file paths
     """
     try:
-        logger.info(f"Running EnergyPlus simulation: {idf_path}")
+        logger.info("Running EnergyPlus simulation: %s", idf_path)
         if weather_file:
-            logger.info(f"With weather file: {weather_file}")
+            logger.info("With weather file: %s", weather_file)
         
         result = ep_manager.run_simulation(
             idf_path=idf_path,
@@ -1199,13 +1198,13 @@ async def run_energyplus_simulation(
             readvars=readvars,
             expandobjects=expandobjects
         )
-        return f"EnergyPlus simulation completed:\n{result}"
+        return result
     except FileNotFoundError as e:
-        logger.warning(f"File not found for simulation: {str(e)}")
-        return f"File not found: {str(e)}"
+        logger.warning("File not found for simulation: %s", e)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error running EnergyPlus simulation: {str(e)}")
-        return f"Error running simulation: {str(e)}"
+        logger.error("Error running EnergyPlus simulation: %s", e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -1228,15 +1227,15 @@ async def create_interactive_plot(
         JSON string with plot creation results and file path
     """
     try:
-        logger.info(f"Creating interactive plot from: {output_directory}")
+        logger.info("Creating interactive plot from: %s", output_directory)
         result = ep_manager.create_interactive_plot(output_directory, idf_name, file_type, custom_title)
-        return f"Interactive plot created:\n{result}"
+        return result
     except FileNotFoundError as e:
-        logger.warning(f"Output files not found: {str(e)}")
-        return f"Files not found: {str(e)}"
+        logger.warning("Output files not found: %s", e)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error creating interactive plot: {str(e)}")
-        return f"Error creating interactive plot: {str(e)}"
+        logger.error("Error creating interactive plot: %s", e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -1263,7 +1262,7 @@ async def convert_output_units(
         JSON string with conversion results, statistics, and converted file path
     """
     try:
-        logger.info(f"Converting output units in: {output_directory}")
+        logger.info("Converting output units in: %s", output_directory)
         result = ep_manager.convert_output_units(
             output_directory=output_directory,
             idf_name=idf_name,
@@ -1272,16 +1271,16 @@ async def convert_output_units(
             save_converted=save_converted,
             file_type=file_type
         )
-        return f"Unit conversion completed:\n{result}"
+        return result
     except FileNotFoundError as e:
-        logger.warning(f"Output files not found: {str(e)}")
-        return f"Files not found: {str(e)}"
+        logger.warning("Output files not found: %s", e)
+        return json.dumps({"error": str(e)})
     except ValueError as e:
-        logger.warning(f"Invalid parameter: {str(e)}")
-        return f"Invalid parameter: {str(e)}"
+        logger.warning("Invalid parameter: %s", e)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error converting output units: {str(e)}")
-        return f"Error converting output units: {str(e)}"
+        logger.error("Error converting output units: %s", e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -1299,7 +1298,7 @@ async def get_server_logs(lines: int = 50) -> str:
         log_file = Path(config.paths.workspace_root) / "logs" / "energyplus_mcp_server.log"
         
         if not log_file.exists():
-            return "Log file not found. Server may be using console logging only."
+            return json.dumps({"message": "Log file not found. Server may be using console logging only."})
         
         # Read last N lines efficiently
         with open(log_file, 'r') as f:
@@ -1313,11 +1312,11 @@ async def get_server_logs(lines: int = 50) -> str:
             "recent_logs": "".join(recent_lines)
         }
         
-        return f"Recent server logs:\n{json.dumps(log_content, indent=2)}"
+        return json.dumps(log_content, indent=2)
         
     except Exception as e:
-        logger.error(f"Error reading server logs: {str(e)}")
-        return f"Error reading server logs: {str(e)}"
+        logger.error("Error reading server logs: %s", e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -1335,7 +1334,7 @@ async def get_error_logs(lines: int = 20) -> str:
         error_log_file = Path(config.paths.workspace_root) / "logs" / "energyplus_mcp_errors.log"
         
         if not error_log_file.exists():
-            return "Error log file not found. No errors logged yet."
+            return json.dumps({"message": "Error log file not found. No errors logged yet."})
         
         with open(error_log_file, 'r') as f:
             all_lines = f.readlines()
@@ -1348,11 +1347,11 @@ async def get_error_logs(lines: int = 20) -> str:
             "recent_errors": "".join(recent_lines)
         }
         
-        return f"Recent error logs:\n{json.dumps(error_content, indent=2)}"
+        return json.dumps(error_content, indent=2)
         
     except Exception as e:
-        logger.error(f"Error reading error logs: {str(e)}")
-        return f"Error reading error logs: {str(e)}"
+        logger.error("Error reading error logs: %s", e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -1367,7 +1366,7 @@ async def clear_logs() -> str:
         log_dir = Path(config.paths.workspace_root) / "logs"
         
         if not log_dir.exists():
-            return "No log directory found."
+            return json.dumps({"message": "No log directory found."})
         
         cleared_files = []
         
@@ -1396,8 +1395,8 @@ async def clear_logs() -> str:
         return json.dumps(result, indent=2)
 
     except Exception as e:
-        logger.error(f"Error clearing logs: {str(e)}")
-        return f"Error clearing logs: {str(e)}"
+        logger.error("Error clearing logs: %s", e)
+        return json.dumps({"error": str(e)})
 
 
 # =============================================================================
@@ -1440,12 +1439,12 @@ async def compute_calibration_metrics(
         )
     """
     try:
-        logger.info(f"Computing calibration metrics: {len(measured)} data points, standard={standard}")
+        logger.info("Computing calibration metrics: %s data points, standard=%s", len(measured), standard)
         result = calibration_orchestrator.compute_calibration_metrics(measured, simulated, standard)
-        return f"Calibration metrics computed:\n{result}"
+        return result
     except Exception as e:
-        logger.error(f"Error computing calibration metrics: {str(e)}")
-        return f"Error computing calibration metrics: {str(e)}"
+        logger.error("Error computing calibration metrics: %s", e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -1488,12 +1487,12 @@ async def compare_to_utility_data(
         )
     """
     try:
-        logger.info(f"Comparing simulation to utility data: {len(simulated_values)} periods")
+        logger.info("Comparing simulation to utility data: %s periods", len(simulated_values))
         result = calibration_orchestrator.compare_utility_data(utility_data, simulated_values, standard)
-        return f"Utility comparison results:\n{result}"
+        return result
     except Exception as e:
-        logger.error(f"Error comparing to utility data: {str(e)}")
-        return f"Error comparing to utility data: {str(e)}"
+        logger.error("Error comparing to utility data: %s", e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -1517,15 +1516,15 @@ async def inspect_calibration_parameters(idf_path: str) -> str:
         JSON string with current parameter values, bounds, and modification guidance
     """
     try:
-        logger.info(f"Inspecting calibration parameters: {idf_path}")
+        logger.info("Inspecting calibration parameters: %s", idf_path)
         result = calibration_orchestrator.inspect_parameters(idf_path)
-        return f"Calibration parameters for {idf_path}:\n{result}"
+        return result
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error inspecting calibration parameters: {str(e)}")
-        return f"Error inspecting calibration parameters: {str(e)}"
+        logger.error("Error inspecting calibration parameters: %s", e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -1568,18 +1567,18 @@ async def modify_calibration_parameters(
             {"infiltration_ach": 0.8}, mode="multiply")
     """
     try:
-        logger.info(f"Modifying calibration parameters: {idf_path}, mode={mode}")
+        logger.info("Modifying calibration parameters: %s, mode=%s", idf_path, mode)
         result = calibration_orchestrator.modify_parameters(idf_path, modifications, mode, output_path)
-        return f"Calibration parameter modifications:\n{result}"
+        return result
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except ValueError as e:
-        logger.warning(f"Invalid parameter modification: {str(e)}")
-        return f"Invalid parameter: {str(e)}"
+        logger.warning("Invalid parameter modification: %s", e)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error modifying calibration parameters: {str(e)}")
-        return f"Error modifying calibration parameters: {str(e)}"
+        logger.error("Error modifying calibration parameters: %s", e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -1596,10 +1595,10 @@ async def get_calibration_standards() -> str:
     try:
         logger.info("Getting calibration standards")
         result = calibration_orchestrator.get_calibration_standards()
-        return f"Available calibration standards:\n{result}"
+        return result
     except Exception as e:
-        logger.error(f"Error getting calibration standards: {str(e)}")
-        return f"Error getting calibration standards: {str(e)}"
+        logger.error("Error getting calibration standards: %s", e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -1635,20 +1634,20 @@ async def setup_sensitivity_analysis(
             parameters=["infiltration_ach", "lighting_power_density", "equipment_power_density"])
     """
     try:
-        logger.info(f"Setting up sensitivity analysis: {idf_path}, method={method}")
+        logger.info("Setting up sensitivity analysis: %s, method=%s", idf_path, method)
         if method == "morris":
             result = calibration_orchestrator.sensitivity_manager.setup_morris_analysis(parameters)
         else:
             result = calibration_orchestrator.sensitivity_manager.setup_local_sensitivity(
                 idf_path, parameters, perturbation_percent
             )
-        return f"Sensitivity analysis setup:\n{result}"
+        return result
     except FileNotFoundError as e:
-        logger.warning(f"IDF file not found: {idf_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("IDF file not found: %s", idf_path)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error setting up sensitivity analysis: {str(e)}")
-        return f"Error setting up sensitivity analysis: {str(e)}"
+        logger.error("Error setting up sensitivity analysis: %s", e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -1680,12 +1679,12 @@ async def get_calibration_parameter_recommendations(
         JSON string with parameter recommendations, bounds, and typical values
     """
     try:
-        logger.info(f"Getting calibration parameter recommendations: category={category}")
+        logger.info("Getting calibration parameter recommendations: category=%s", category)
         result = calibration_orchestrator.get_parameter_recommendations(category)
-        return f"Calibration parameter recommendations:\n{result}"
+        return result
     except Exception as e:
-        logger.error(f"Error getting parameter recommendations: {str(e)}")
-        return f"Error getting parameter recommendations: {str(e)}"
+        logger.error("Error getting parameter recommendations: %s", e)
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -1719,7 +1718,7 @@ async def load_utility_data(
     from energyplus_mcp_server.utils.path_utils import resolve_path
 
     try:
-        logger.info(f"Loading utility data: {csv_path}")
+        logger.info("Loading utility data: %s", csv_path)
 
         # Resolve path (check sample_files if just filename)
         resolved_path = resolve_path(config, csv_path, file_types=['.csv'], description="utility data CSV")
@@ -1804,20 +1803,20 @@ async def load_utility_data(
                 }
             }
 
-        return f"Utility data loaded:\n{json.dumps(result, indent=2)}"
+        return json.dumps(result, indent=2)
 
     except FileNotFoundError as e:
-        logger.warning(f"Utility data file not found: {csv_path}")
-        return f"File not found: {str(e)}"
+        logger.warning("Utility data file not found: %s", csv_path)
+        return json.dumps({"error": str(e)})
     except Exception as e:
-        logger.error(f"Error loading utility data: {str(e)}")
-        return f"Error loading utility data: {str(e)}"
+        logger.error("Error loading utility data: %s", e)
+        return json.dumps({"error": str(e)})
 
 
 if __name__ == "__main__":
-    logger.info(f"Starting {config.server.name} v{config.server.version}")
-    logger.info(f"EnergyPlus version: {config.energyplus.version}")
-    logger.info(f"Sample files path: {config.paths.sample_files_path}")
+    logger.info("Starting %s v%s", config.server.name, config.server.version)
+    logger.info("EnergyPlus version: %s", config.energyplus.version)
+    logger.info("Sample files path: %s", config.paths.sample_files_path)
     
     try:
         # Use FastMCP's built-in run method with stdio transport
@@ -1825,7 +1824,7 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         logger.info("Server shutdown requested")
     except Exception as e:
-        logger.error(f"Server error: {str(e)}")
+        logger.error("Server error: %s", e)
         raise
     finally:
         logger.info("Server stopped")
