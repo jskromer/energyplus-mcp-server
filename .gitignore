@@ -24,6 +24,16 @@ venv/
 *.svg
 Energy+.ini
 
+# Claude Code
+.claude/
+
+# Build artifacts
+*.egg-info/
+
+# Runtime
+logs/
+outputs/
+
 # IDE
 .vscode/
 .idea/
